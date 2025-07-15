@@ -1,6 +1,7 @@
 # ClickBeard - Sistema de Agendamento para Barbearia
 
 Observação: Fiquei em dúvida se deveria utilizar Next.js no frontend ou se poderia empregar o Prisma ORM com MySQL no backend, pois o PDF não mencionava esses requisitos. No fim, optei por desenvolver o frontend apenas com React e utilizei Prisma + MySQL para persistência de dados. Além disso, o visual não ficou tão elaborado, já que executei o desafio somente após meu expediente e o tempo era limitado.
+
 Sistema  para gerenciamento de agendamentos de barbearia, desenvolvido com Node.js (NestJS) no backend e React com TypeScript no frontend.
 
 ## 🚀 Tecnologias Utilizadas
@@ -26,13 +27,13 @@ Sistema  para gerenciamento de agendamentos de barbearia, desenvolvido com Node.
 - npm ou yarn
 - Docker e Docker Compose
 - Git
-
+- Precisa estar com docker rodando!!
 ## 🔧 Instalação e Configuração
 
 ### 1. Clone o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/ClickBeard_seu_nome.git
+git clone https://github.com/LucasMGaspar/ClickbeardApi.git
 cd ClickBeard_seu_nome
 ```
 
@@ -119,6 +120,7 @@ openssl genrsa -out private.pem 2048
 # Gerar chave pública
 openssl rsa -in private.pem -pubout -out public.pem
 ```
+#### Mas acredito que só ultlizar as mesmas chaves JWT, que esta acima
 
 #### 2.4. Inicie o banco de dados com Docker
 ```bash
@@ -127,7 +129,7 @@ docker-compose up -d
 
 #### 2.5. Execute as migrations do Prisma
 ```bash
-npx prisma generate
+npx prisma generate   
 ```
 
 #### 2.6. Trouxe essa opção para popular o banco com dados iniciais (Vai gerara esse user admin: admin@clickbeard.com, senha: admin123 )
