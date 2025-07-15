@@ -130,11 +130,13 @@ docker-compose up -d
 ```bash
 npx prisma migrate dev
 ```
+#### Pode acontecer de aparecer um aviso em vermelho apos o prisma migrate dev, mas pode tentar prosseguir com npx prisma generate e coma geração da seed para popular o banco npx prisma db seed
 
-#### 2.5. Execute as migrations do Prisma
+#### 2.5. Execute prisma generate
 ```bash
 npx prisma generate   
 ```
+
 
 #### 2.6. Trouxe essa opção para popular o banco com dados iniciais (Vai gerara esse user admin: admin@clickbeard.com, senha: admin123 )
 ```bash
