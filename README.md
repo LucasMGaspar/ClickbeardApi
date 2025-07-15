@@ -127,7 +127,9 @@ openssl rsa -in private.pem -pubout -out public.pem
 docker-compose up -d
 
 ```
+```bash
 npx prisma migrate dev
+```
 
 #### 2.5. Execute as migrations do Prisma
 ```bash
