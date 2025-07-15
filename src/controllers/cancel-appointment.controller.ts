@@ -9,7 +9,6 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { fromZonedTime, toZonedTime } from 'date-fns-tz';
 
-// ──────────────────────────────────────────────
 const TZ = 'America/Sao_Paulo';
 
 const createAppointmentBodySchema = z.object({
@@ -34,7 +33,6 @@ export class CreateAppointmentController {
   ) {
     const { barberId, specialtyId, appointmentDate } = body;
     const userId = req.user.sub;
-
 
     const appointmentUTC = fromZonedTime(appointmentDate, TZ);
     const nowUTC = new Date();
