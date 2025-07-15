@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  main-db:
+    image: mysql:8.0                
+    container_name: click-beard-db
+    restart: always
+
+    environment:
+      MYSQL_DATABASE: click-beard
+      MYSQL_ROOT_PASSWORD: 12345678
+      # MYSQL_USER: user
+      # MYSQL_PASSWORD: senha_do_user
+
+    ports:
+      - '3306:3306'                
+
+    volumes:
+      - ./data/db:/var/lib/mysql   
+
+  
+   

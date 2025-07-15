@@ -1,0 +1,101 @@
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CLIENT
+  ADMIN
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      UserRole @default(CLIENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relacionamentos
+  appointments Appointment[]
+
+  @@map("users")
+}
+
+model Barber {
+  id       String   @id @default(uuid())
+  name     String
+  age      Int
+  hireDate DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relacionamentos
+  specialties  BarberSpecialty[]
+  appointments Appointment[]
+
+  @@map("barbers")
+}
+
+model Specialty {
+  id        String @id @default(uuid())
+  name      String @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relacionamentos
+  barbers      BarberSpecialty[]
+  appointments Appointment[]
+
+  @@map("specialties")
+}
+
+model BarberSpecialty {
+  id          String @id @default(uuid())
+  barberId    String
+  specialtyId String
+  createdAt   DateTime @default(now())
+
+  // Relacionamentos
+  barber    Barber    @relation(fields: [barberId], references: [id], onDelete: Cascade)
+  specialty Specialty @relation(fields: [specialtyId], references: [id], onDelete: Cascade)
+
+  @@unique([barberId, specialtyId])
+  @@map("barber_specialties")
+}
+
+model Appointment {
+  id              String            @id @default(uuid())
+  userId          String
+  barberId        String
+  specialtyId     String
+  appointmentDate DateTime
+  status          AppointmentStatus @default(SCHEDULED)
+  cancelledAt     DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  // Relacionamentos
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  barber    Barber    @relation(fields: [barberId], references: [id], onDelete: Cascade)
+  specialty Specialty @relation(fields: [specialtyId], references: [id], onDelete: Cascade)
+
+  // Índices para performance e constraints
+  @@index([userId])
+  @@index([appointmentDate])
+  @@index([status])
+  @@map("appointments")
+}

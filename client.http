@@ -1,0 +1,80 @@
+
+@baseUrl = http://localhost:3333
+
+@token = eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbWQwdWI4ZmgwMDAwa29yc2JuaWk0YXNsIiwiaWF0IjoxNzUyMzYyMzQ5fQ.H1FBkTilzk66kXI_zSFiRQPE-pgSVF5xqgkM63HTX-8898nKN2Y8RCKKqpxM1E81CI5mPmEVX0jnDQeISatemlGbjobF723w_VnCTFhDeS7WEDyD7ImsKBsCCMjABXX7YUDC8Xko7jE9BrGuscjj6sxqpa4-11yrunMmfew1HyEEOvlZkwKn2ZDqYKhTpkrllsL-ZN8HknxIvTJkYQth3DTMfkRL7BUBGv1dfpR3iZzAe9HqmEGRq1cTFZnyq6DL6PPV9MjYHiclluuhbF2ANe-QApz5lEeFwIvTEWQQi4bS8fQVqhO83N7hrpkXNI-ieuHc9G2qAxBB-tRU2XWulg
+
+# @name create_account
+POST {{baseUrl}}/accounts
+Content-Type: application/json
+
+
+{
+    "name": "Lucas Manoel",
+    "email": "admin1@clickbeard.com",
+    "password": "12345678"
+}
+
+###
+
+
+# @name Login
+POST {{baseUrl}}/sessions
+Content-Type: application/json
+
+
+{
+    
+    "email": "admin1@clickbeard.com",
+    "password": "12345678"
+}
+
+###
+# @name create_specialties
+POST {{baseUrl}}/specialties
+Content-Type: application/json
+
+{
+  "name": "Corte de Barba"
+}
+
+###
+# @name List_specialties
+GET {{baseUrl}}/specialties
+
+
+###
+# @name Create_barbers
+POST {{baseUrl}}/barbers
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwZDM3Y2NhMy04NjJhLTRhNzQtOWI5NS1mZjIxOWQyMzY4YzMiLCJlbWFpbCI6ImFkbWluMUBjbGlja2JlYXJkLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc1MjQxNDM0NX0.jIVQEj4gSrwr4Rm2XhUcphWIVvsYWd3aJFhUUuqxytQmqkBCYam3IO1wtAM8Ap2FCSpA5bSeSBtc3HX7ShTpfsOTv7gusduKkyMzmg0-NNN45Yc6ydsQIhhJr-lIr7UDIfkmTcRqhXV2fXITPr9_EOcUCbRdPwxkLBg-cHBSosSROwJdLd_BDz8DtDChBZ2NBWkcUUkOynHAfcmlm-OCZo2U9n69fVyGtIOu_oXBZF8WKSx-w_1TIHPun9RuxB8k3G-dqX7O80aG4SC6FBcPnFSU9lZAYO5FKL5PrZywbGSl3UArxr0EeInW0hKf0PA6kb9PuJX_A2Ezf3QXGg4Krg
+
+{
+  "name": " Silva",
+  "age": 28,
+  "hireDate": "2024-01-15T08:00:00.000Z",
+  "specialtyIds": ["340ba5e9-d328-4714-a076-f8641046b513"]
+}
+
+###
+# @name ListAll_appointments
+GET {{baseUrl}}/appointments
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjMjExNjJmNC0wNTAwLTQ2ODItYWM4MS02MGJhZTJiZjYyNGQiLCJpYXQiOjE3NTIzNjQ0NDV9.Yop_aY5q0uQCooxkoxMsTbvrM9NH4ud494s4R9knv5v9ccAg_0wP_5hnDUo8SUYernwS4i5qE0mcp8lYZ73WbVut2MG25ggXFJJG5X5WpQ6G4zEo_xW-nVtf4VYcPdWVaxT_Qli0QWKlFIXA7496_8wgWF06DAqmE-YIBMPbO3oVU0XKPkmQ1e-HTE1PWPrFFNqIl6Vz3Ir1gunPzp1562wf6nAwWbF9JrGCN3LYEZt0FEFwvRPbtnCKq1izAlD71eRKH3B47FkuaFkyxqwLl7rFjGf54Spa-A51Ha72iVnQ1tCx-2CwiQtb1DmKncdKRrYjsfff1Qjop_8AzafOdw
+
+###
+# @name appointments
+POST {{baseUrl}}/appointments
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwZDM3Y2NhMy04NjJhLTRhNzQtOWI5NS1mZjIxOWQyMzY4YzMiLCJlbWFpbCI6ImFkbWluMUBjbGlja2JlYXJkLmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc1MjQyNTYxOH0.FBM4fYDL6HI7l9U669XXQA8vqlvtbxU6_H_q8QiOPUtthXVZEEYfcqP3RRHmZCT0dpvmSiz05kDcqkaGDauaKEEeaGSy4UchWUUjz_QHhwFpaA2Ihc4xdD59__wJQtOBjbEL59xyYHpOSJnIfLLAVFd9o1FSEqXlLMAv1f9GZ3ytZJPayOlsGvXa0qYtweHN7K4eDzb2fHpISxVYU65YgxN-k5EU4CdZ72HW5m6LmaOJpZxcr8XmUP4JjIJZ4pyzdvQXUgaoLyt-OdXWjJOG-xle9soUtmfUbaQOgMQuG6OfRWxKQSPo8nDiagix82MixuQUPwMTQjoWd-86t077tA
+
+{
+  "barberId": "9b0b3a51-9cfa-41c2-a006-e868fdc08086",
+  "specialtyId": "340ba5e9-d328-4714-a076-f8641046b513",
+  "appointmentDate": "2023-07-15T13:30:00.000Z"
+}
+
+###
+# @name ListMy_appointments
+GET {{baseUrl}}/appointments/my
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjMjExNjJmNC0wNTAwLTQ2ODItYWM4MS02MGJhZTJiZjYyNGQiLCJpYXQiOjE3NTIzNjQ0NDV9.Yop_aY5q0uQCooxkoxMsTbvrM9NH4ud494s4R9knv5v9ccAg_0wP_5hnDUo8SUYernwS4i5qE0mcp8lYZ73WbVut2MG25ggXFJJG5X5WpQ6G4zEo_xW-nVtf4VYcPdWVaxT_Qli0QWKlFIXA7496_8wgWF06DAqmE-YIBMPbO3oVU0XKPkmQ1e-HTE1PWPrFFNqIl6Vz3Ir1gunPzp1562wf6nAwWbF9JrGCN3LYEZt0FEFwvRPbtnCKq1izAlD71eRKH3B47FkuaFkyxqwLl7rFjGf54Spa-A51Ha72iVnQ1tCx-2CwiQtb1DmKncdKRrYjsfff1Qjop_8AzafOdw
+
