@@ -1,53 +1,52 @@
 import {
-  Body,
-  Controller,
-  HttpCode,
-  Post,
-  Get,
-  Query,
-  UsePipes,
-  BadRequestException,
-  UseGuards,
-  Request,
+  Body, Controller, HttpCode, Post, Get, Query,
+  UsePipes, BadRequestException, UseGuards, Request,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { z } from 'zod';
 import { ZodValidationPipe } from 'src/pipes/zod-validation-pipe';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'; 
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { fromZonedTime, toZonedTime } from 'date-fns-tz';
+
+const TZ = 'America/Sao_Paulo';
 
 const createAppointmentBodySchema = z.object({
-  barberId:       z.uuid('ID do barbeiro deve ser um UUID válido'),
-  specialtyId:    z.uuid('ID da especialidade deve ser um UUID válido'),
-  appointmentDate:z.string().datetime('Data do agendamento deve ser uma data válida'),
+  barberId: z.uuid('ID do barbeiro deve ser um UUID válido'),
+  specialtyId: z.uuid('ID da especialidade deve ser um UUID válido'),
+  appointmentDate: z.string().datetime('Data do agendamento deve ser uma data ISO válida'),
 });
-type CreateAppointmentBodySchema = z.infer<typeof createAppointmentBodySchema>;
+type CreateAppointmentBody = z.infer<typeof createAppointmentBodySchema>;
 
 @Controller('/appointments')
 export class CreateAppointmentController {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
+
 
   @Post()
   @HttpCode(201)
   @UseGuards(JwtAuthGuard)
   @UsePipes(new ZodValidationPipe(createAppointmentBodySchema))
-  async handle(@Body() body: CreateAppointmentBodySchema, @Request() req: any) {
+  async handle(
+    @Body() body: CreateAppointmentBody,
+    @Request() req: any,
+  ) {
     const { barberId, specialtyId, appointmentDate } = body;
     const userId = req.user.sub;
 
-    const appointmentDateTime = new Date(appointmentDate);
-    const now                 = new Date();
-
-    if (appointmentDateTime <= now)
+    const appointmentUTC = fromZonedTime(appointmentDate, TZ);
+    const nowUTC = new Date();
+    if (appointmentUTC <= nowUTC)
       throw new BadRequestException('O agendamento deve ser feito para uma data futura');
 
-    const hour    = appointmentDateTime.getHours();
-    const minutes = appointmentDateTime.getMinutes();
+    const appointmentBR = toZonedTime(appointmentUTC, TZ);
+    const hour = appointmentBR.getHours();
+    const minutes = appointmentBR.getMinutes();
     if (hour < 8 || hour >= 18)
       throw new BadRequestException('A barbearia funciona das 8h às 18h');
     if (minutes !== 0 && minutes !== 30)
       throw new BadRequestException('Os agendamentos devem ser feitos em intervalos de 30 minutos (00 ou 30)');
-    if (appointmentDateTime.getDay() === 0)
+    if (appointmentBR.getDay() === 0)
       throw new BadRequestException('A barbearia não funciona aos domingos');
 
     const barber = await this.prisma.barber.findUnique({
@@ -60,25 +59,19 @@ export class CreateAppointmentController {
     if (!hasSpecialty)
       throw new BadRequestException('Este barbeiro não possui a especialidade solicitada');
 
-  
-    const anyAppointment = await this.prisma.appointment.findFirst({
-      where: { barberId, appointmentDate: appointmentDateTime },
+    const existing = await this.prisma.appointment.findFirst({
+      where: { barberId, appointmentDate: appointmentUTC },
     });
 
     let appointment;
-    if (anyAppointment) {
-      if (anyAppointment.status === 'CANCELLED') {
-        
+    if (existing) {
+      if (existing.status === 'CANCELLED') {
         appointment = await this.prisma.appointment.update({
-          where: { id: anyAppointment.id },
-          data: {
-            userId,
-            specialtyId,
-            status: 'SCHEDULED',
-          },
+          where: { id: existing.id },
+          data: { userId, specialtyId, status: 'SCHEDULED' },
           include: {
-            user:      { select: { id: true, name: true, email: true } },
-            barber:    { select: { id: true, name: true } },
+            user: { select: { id: true, name: true, email: true } },
+            barber: { select: { id: true, name: true } },
             specialty: { select: { id: true, name: true } },
           },
         });
@@ -86,72 +79,62 @@ export class CreateAppointmentController {
         throw new BadRequestException('Este horário já está ocupado para o barbeiro selecionado');
       }
     } else {
-      
       try {
         appointment = await this.prisma.appointment.create({
           data: {
-            userId,
-            barberId,
-            specialtyId,
-            appointmentDate: appointmentDateTime,
+            userId, barberId, specialtyId,
+            appointmentDate: appointmentUTC,
             status: 'SCHEDULED',
           },
           include: {
-            user:      { select: { id: true, name: true, email: true } },
-            barber:    { select: { id: true, name: true } },
+            user: { select: { id: true, name: true, email: true } },
+            barber: { select: { id: true, name: true } },
             specialty: { select: { id: true, name: true } },
           },
         });
       } catch (err) {
-       
-        if (
-          err instanceof PrismaClientKnownRequestError &&
-          err.code === 'P2002'
-        ) {
+        if (err instanceof PrismaClientKnownRequestError && err.code === 'P2002')
           throw new BadRequestException('Este horário já está ocupado para o barbeiro selecionado');
-        }
-        throw err; 
+        throw err;
       }
     }
 
     return {
-      id:             appointment.id,
-      appointmentDate:appointment.appointmentDate,
-      status:         appointment.status,
-      user:           appointment.user,
-      barber:         appointment.barber,
-      specialty:      appointment.specialty,
+      id: appointment.id,
+      appointmentDate: appointment.appointmentDate,
+      status: appointment.status,
+      user: appointment.user,
+      barber: appointment.barber,
+      specialty: appointment.specialty,
     };
   }
 
   @Get('/available-times')
   async getAvailableTimes(
     @Query('barberId') barberId: string,
-    @Query('date')     date:     string,
+    @Query('date') date: string,
   ) {
     if (!barberId || !date)
       throw new BadRequestException('barberId e date são obrigatórios');
 
-    const targetDate = new Date(date);
-    const now        = new Date();
-    const today      = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const appointmentDay = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
+    const startUTC = fromZonedTime(`${date}T00:00:00`, TZ);
+    const endUTC = fromZonedTime(`${date}T23:59:59.999`, TZ);
 
-    if (appointmentDay < today)
+    const nowUTC = new Date();
+    const nowBR = toZonedTime(nowUTC, TZ);
+    const todayBR = new Date(nowBR.getFullYear(), nowBR.getMonth(), nowBR.getDate());
+
+    const appointmentDayBR = toZonedTime(startUTC, TZ);
+    if (appointmentDayBR < todayBR)
       throw new BadRequestException('A data deve ser hoje ou no futuro');
 
     const barber = await this.prisma.barber.findUnique({ where: { id: barberId } });
     if (!barber) throw new BadRequestException('Barbeiro não encontrado');
 
-    const startOfDay = new Date(targetDate);
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay   = new Date(targetDate);
-    endOfDay.setHours(23, 59, 59, 999);
-
-    const existingAppointments = await this.prisma.appointment.findMany({
+    const dayAppointments = await this.prisma.appointment.findMany({
       where: {
         barberId,
-        appointmentDate: { gte: startOfDay, lte: endOfDay },
+        appointmentDate: { gte: startUTC, lte: endUTC },
         status: { not: 'CANCELLED' },
       },
       select: { appointmentDate: true },
@@ -163,18 +146,19 @@ export class CreateAppointmentController {
       allTimes.push(`${h.toString().padStart(2, '0')}:30`);
     }
 
-    const occupiedTimes = existingAppointments.map(a =>
-      `${a.appointmentDate.getHours().toString().padStart(2, '0')}:` +
-      `${a.appointmentDate.getMinutes().toString().padStart(2, '0')}`,
-    );
+
+    const occupiedTimes = dayAppointments.map(a => {
+      const d = toZonedTime(a.appointmentDate, TZ);
+      return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+    });
 
     let availableTimes = allTimes.filter(t => !occupiedTimes.includes(t));
 
-    if (appointmentDay.getTime() === today.getTime()) {
-      const currentMin = now.getHours() * 60 + now.getMinutes() + 30; // 30 min de antecedência
+    if (appointmentDayBR.getTime() === todayBR.getTime()) {
+      const minAllowed = nowBR.getHours() * 60 + nowBR.getMinutes() + 30;
       availableTimes = availableTimes.filter(t => {
         const [h, m] = t.split(':').map(Number);
-        return h * 60 + m > currentMin;
+        return h * 60 + m > minAllowed;
       });
     }
 
@@ -183,8 +167,8 @@ export class CreateAppointmentController {
       barberId,
       barberName: barber.name,
       availableTimes,
-      totalSlots:      allTimes.length,
-      availableSlots:  availableTimes.length,
+      totalSlots: allTimes.length,
+      availableSlots: availableTimes.length,
       occupiedTimes,
     };
   }
