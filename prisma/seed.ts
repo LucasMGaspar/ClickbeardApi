@@ -74,7 +74,7 @@ async function main() {
     update: {},
     create: {
       name: 'Administrador',
-      email: 'admin4@clickbeard.com',
+      email: 'admin@clickbeard.com',
       password: adminHash,
       role: UserRole.ADMIN,
     },
