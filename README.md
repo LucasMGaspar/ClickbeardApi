@@ -125,7 +125,7 @@ openssl rsa -in private.pem -pubout -out public.pem
 #### 2.4. Inicie o banco de dados com Docker
 ```bash
 docker-compose up -d
-npx prisma migrate dev
+
 ```
 npx prisma migrate dev
 
