@@ -127,7 +127,7 @@ docker-compose up -d
 
 #### 2.5. Execute as migrations do Prisma
 ```bash
-npx prisma migrate dev
+npx prisma generate
 ```
 
 #### 2.6. Trouxe essa opção para popular o banco com dados iniciais (Vai gerara esse user admin: admin@clickbeard.com, senha: admin123 )
