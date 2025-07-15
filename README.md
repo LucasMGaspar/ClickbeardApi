@@ -34,14 +34,14 @@ Sistema  para gerenciamento de agendamentos de barbearia, desenvolvido com Node.
 
 ```bash
 git clone https://github.com/LucasMGaspar/ClickbeardApi.git
-cd ClickbeardApi.git
+
 ```
 
 ### 2. Configure o Backend
 
 #### 2.1. Entre na pasta do backend
 ```bash
-cd click-beard
+cd ClickbeardApi
 ```
 
 #### 2.2. Instale as dependências
